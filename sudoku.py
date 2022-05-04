@@ -29,7 +29,7 @@ def table_modi(name,table):
 
 def check(table,i,j):
     number = table[i][j] #First get the number we want to check
-    for x,l in enumerate(table[i]): #Here we check the line 
+    for x,l in enumerate(table[i]): #Here we check the row 
         if l == number and j != x: #If is the same number and is in a different position   
             return False
     for x,l in enumerate(table[:,j]):#Here we check the column
