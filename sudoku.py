@@ -107,45 +107,11 @@ class Sudoku(object):
         :return: list correponding to the numbers in the square
         """
         square = []
-        if i in range(0,3): #Top squares
-            if j in range(0,3): #Left square
-                for x in range(0,3):
-                    for y in range(0,3):
-                        square.append(self.sudoku[x][y].get_value())
-            elif j in range(3,6): #Middel square
-                for x in range(0,3):
-                    for y in range(3,6):
-                        square.append(self.sudoku[x][y].get_value())
-            else: #Right Square
-                for x in range(0,3):
-                    for y in range(6,9):
-                        square.append(self.sudoku[x][y].get_value())
-        elif i in range(3,6): #Middel Squares
-            if j in range(0,3): #Left Squeare
-                for x in range(3,6):
-                    for y in range(0,3):
-                        square.append(self.sudoku[x][y].get_value())
-            elif j in range(3,6): #Middel Square
-                for x in range(3,6):
-                    for y in range(3,6):
-                        square.append(self.sudoku[x][y].get_value())
-            else: #Right Square
-                for x in range(3,6):
-                    for y in range(6,9):
-                        square.append(self.sudoku[x][y].get_value())
-        else: #Bottom Squares
-            if j in range(0,3): #Left Squre
-                for x in range(6,9):
-                    for y in range(0,3):
-                        square.append(self.sudoku[x][y].get_value())
-            elif j in range(3,6): #Middel Square
-                for x in range(6,9):
-                    for y in range(3,6):
-                        square.append(self.sudoku[x][y].get_value())
-            else: #Right Square
-                for x in range(6,9):
-                    for y in range(6,9):
-                        square.append(self.sudoku[x][y].get_value())
+        multiplier_x = i//3
+        multiplier_y = j//3
+        for x in range(3*multiplier_x,3*(multiplier_x+1)):
+            for y in range(3*multiplier_y,3*(multiplier_y+1)):
+                square.append(self.sudoku[x][y].get_value())
         return square
 
     def evaluate_missing_positions(self):
@@ -205,24 +171,28 @@ class Sudoku(object):
                         numbers_given = set(col + sqr + row_test)
                         numbers_given.remove(0)
                         missing_in_row.append(list(set(range(1,10)).difference(numbers_given)))
-                    change_done = True
-                    if row_number == 4:
-                        print(missing_in_row)
-                    while change_done:
-                        change_done = False
+                    change_done_row = True
+                    while change_done_row:
+                        change_done_row = False
+                        to_delete = []
                         for x in range(len(missing_in_row)):
-                            test = set(missing_in_row.pop(0)) 
-                            rest = missing_in_row.copy()
-                            rest = set(list(chain.from_iterable(rest)))
-                            aveliable = test.difference(rest)
-                            if len(aveliable) == 1:
-                                index_col = row_missing_index.pop(x) 
-                                self.sudoku[row_number][index_col].from_missing_to_given(list(aveliable)[0])
-                                change_done = True
-                            else: 
-                                missing_in_row.append(test)
+                            if not x in to_delete:
+                                test = set(missing_in_row.pop(0)) 
+                                rest = missing_in_row.copy()
+                                rest = set(list(chain.from_iterable(rest)))
+                                aveliable = test.difference(rest)
+                                if len(aveliable) == 1:
+                                    index_col = row_missing_index[x]
+                                    self.sudoku[row_number][index_col].from_missing_to_given(list(aveliable)[0])
+                                    change_done = True
+                                    change_done_row = True
+                                    to_delete.append(x)
+                                else: 
+                                    missing_in_row.append(test)
+                        if len(to_delete) != 0:
+                            for index_to_delete,index_row_missing in enumerate(to_delete):
+                                del row_missing_index[index_row_missing-index_to_delete]
                 
-
     def solve(self,index):
         """
         This function solves the sudoku
